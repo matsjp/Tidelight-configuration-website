@@ -23,6 +23,9 @@ const MainListItems = props => {
         else if (eventTarget.id === 'wifiButton'){
             props.setDashboard('WifiDashboard');
         }
+        else if (eventTarget.id === 'offlineButton'){
+          props.setDashboard('OfflineDashboard');
+      }
     }
 
     return (
@@ -50,6 +53,12 @@ const MainListItems = props => {
       <BarChartIcon />
     </ListItemIcon>
     <ListItemText primary="Wifi" />
+  </ListItem>
+  <ListItem button onClick={handleClick} id='offlineButton'>
+    <ListItemIcon>
+      <BarChartIcon />
+    </ListItemIcon>
+    <ListItemText primary="Offline" />
   </ListItem>
 </div>)
 }

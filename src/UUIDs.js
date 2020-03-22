@@ -1,6 +1,7 @@
 //Services
 export const configServiceUUID = 0xec00;
 export const wifiServiceUUID = 0xec01;
+export const offlineServiceUUID = 0xec02;
 
 //characteristics
 //configService
@@ -17,6 +18,10 @@ export const movingPatternCharacteristicUUID = 0xec19;
 export const movingSpeedCharacteristicUUID = 0xec1a;
 export const latLonCharacteristicUUID = 0xec1b;
 
-//wifiservice
+//wifiService
 export const wifiScanCharacteristicUUID = 0xec0f;
 export const addWifiCharacteristicUUID = 0xec10;
+
+//offlineService
+export const offlineModeCharacteristicUUID = 0xec0f;
+export const offlineDownloadCharacteristicUUID = 0xec10;

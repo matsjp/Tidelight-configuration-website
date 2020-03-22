@@ -24,9 +24,7 @@ const Brightness = props => {
         const eventTarget = event.currentTarget.id;
 
         if (eventTarget === 'colorSubmit'){
-            //TODO
             const value = Uint8Array.of(color.r, color.g, color.b);
-            console.log(value);
             props.writeValue(props.serviceUUID, props.characteristicUUID, successCallback, failureCallback, value)
         }
         else if (eventTarget === 'colorRead'){
@@ -39,7 +37,6 @@ const Brightness = props => {
         const g = value.getUint8(1);
         const b = value.getUint8(2);
         const hex = rgb2hex(r, g, b);
-        console.log(hex);
         setReadColor(hex);
     }
     

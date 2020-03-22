@@ -15,7 +15,9 @@ import TideApiDashboard from './components/TideApiDashboard';
 import LEDDashboard from './components/LEDDashboard';
 import LDRDashboard from './components/LDRDashboard';
 import WifiDashboard from './components/WifiDashboard';
+import OfflineDashboard from './components/OfflineDashboard'
 import useStyles from './Style'
+import { configServiceUUID, offlineServiceUUID, wifiServiceUUID} from './UUIDs'
 
 export default function Dashboard() {
     const classes = useStyles();
@@ -93,6 +95,9 @@ export default function Dashboard() {
     else if (dashboard === 'WifiDashboard'){
         selectedDashboard = <WifiDashboard readValue={readValue} writeValue={writeValue}/>
     }
+    else if (dashboard === 'OfflineDashboard'){
+      selectedDashboard = <OfflineDashboard readValue={readValue} writeValue={writeValue}/>
+    }
 
     const handleOnClick = event => {
         if (event.currentTarget.id === 'toolbar'){
@@ -108,7 +113,7 @@ export default function Dashboard() {
     const connect = () => {
         let options = {};
           options.acceptAllDevices = true;
-          options.optionalServices = [0x13333333333333333333333333333337, 0xec00];
+          options.optionalServices = [configServiceUUID, offlineServiceUUID, wifiServiceUUID];
         navigator.bluetooth.requestDevice(options)
         .then(device => {
             console.log(device);
