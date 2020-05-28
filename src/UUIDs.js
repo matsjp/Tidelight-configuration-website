@@ -17,6 +17,7 @@ export const noTideLevelIndicatorMovingColorCharacteristicUUID = 0xec18;
 export const movingPatternCharacteristicUUID = 0xec19;
 export const movingSpeedCharacteristicUUID = 0xec1a;
 export const latLonCharacteristicUUID = 0xec1b;
+export const resetUUID = 0xec1c;
 
 //wifiService
 export const wifiScanCharacteristicUUID = 0xec0f;

@@ -46,12 +46,12 @@ export default function Dashboard() {
               return characteristic.readValue()
               .then(value => {
                 successCallback(value)
-              })
+              }).catch(error => { console.log(error); });
             })
           })
         }
         else {
-          console.log('Readfailure not connected')
+          console.log('Read failure not connected')
           failureCallback();
         }
       }
@@ -71,13 +71,60 @@ export default function Dashboard() {
                 return characteristic.readValue()
                 .then(value => {
                   successCallback(value)
-                })
+                }).catch(error => { console.log(error); });
               })
             })
           })
         }
         else {
-          console.log('Readfailure not connected')
+          console.log('Write failure not connected')
+          failureCallback();
+        }
+      }
+
+      const writeValueNoRead = (serviceUUID, characteristicUUID, successCallback, failureCallback, value) => {
+        if (!bluetoothDevice){
+          console.log('No bluetoothdevice')
+          failureCallback();
+        }
+        if (isConnected){
+          bluetoothDevice.gatt.getPrimaryService(serviceUUID)
+          .then(service => {
+            return service.getCharacteristic(characteristicUUID)
+            .then(characteristic => {
+              return characteristic.writeValue(value)
+              .then(value => {
+                successCallback(value);
+              }).catch(error => { console.log(error); });
+            })
+          })
+        }
+        else {
+          console.log('Write failure not connected')
+          failureCallback();
+        }
+      }
+
+      const subscribe = (serviceUUID, characteristicUUID, successCallback, failureCallback, changeCallback) => {
+        if (!bluetoothDevice){
+          console.log('No bluetoothdevice');
+          failureCallback();
+        }
+        if (isConnected){
+          bluetoothDevice.gatt.getPrimaryService(serviceUUID)
+          .then(service => {
+            return service.getCharacteristic(characteristicUUID)
+            .then(characteristic => {
+              characteristic.startNotifications()
+              .then(characteristic => {
+                characteristic.addEventListener('characteristicvaluechanged', changeCallback);
+                successCallback();
+              }).catch(error => { console.log(error); });
+            })
+          })
+        }
+        else {
+          console.log('Subscribe failure not connected');
           failureCallback();
         }
       }
@@ -87,13 +134,13 @@ export default function Dashboard() {
         selectedDashboard = <TideApiDashboard readValue={readValue} writeValue={writeValue}/>;
     }
     else if (dashboard === 'LEDDashboard'){
-        selectedDashboard = <LEDDashboard readValue={readValue} writeValue={writeValue}/>
+        selectedDashboard = <LEDDashboard readValue={readValue} writeValue={writeValue} writeValueNoRead={writeValueNoRead}/>
     }
     else if (dashboard === 'LDRDashboard'){
         selectedDashboard = <LDRDashboard readValue={readValue} writeValue={writeValue}/>
     }
     else if (dashboard === 'WifiDashboard'){
-        selectedDashboard = <WifiDashboard readValue={readValue} writeValue={writeValue}/>
+        selectedDashboard = <WifiDashboard readValue={readValue} writeValue={writeValue} subscribe={subscribe} writeValueNoRead={writeValueNoRead}/>
     }
     else if (dashboard === 'OfflineDashboard'){
       selectedDashboard = <OfflineDashboard readValue={readValue} writeValue={writeValue}/>

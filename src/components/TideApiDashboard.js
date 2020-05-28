@@ -10,6 +10,7 @@ import Chart from '../Chart';
 import Deposits from '../Deposits';
 import Orders from '../Orders';
 import useStyles from './../Style'
+import TideLatLon from './TideLatLon'
 
 function Copyright() {
     return (
@@ -26,39 +27,20 @@ function Copyright() {
 
 
 const TideApiDashboard = props => {
-    const classes = useStyles();
-    const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const classes = useStyles();
+  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-    return (
-        <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={3}>
-            {/* Chart */}
-            <Grid item xs={12} md={8} lg={9}>
-              <Paper className={fixedHeightPaper}>
-                <Chart />
-              </Paper>
-            </Grid>
-            {/* Recent Deposits */}
-            <Grid item xs={12} md={4} lg={3}>
-              <Paper className={fixedHeightPaper}>
-                <Deposits />
-              </Paper>
-            </Grid>
-            {/* Recent Orders */}
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Orders />
-              </Paper>
-            </Grid>
+  return (
+  <main className={classes.content}>
+      <div className={classes.appBarSpacer} />
+      <Container maxWidth="lg" className={classes.container}>
+      <Grid container direction="column" justify="center" alignItems="center" spacing={3}>
+          <Grid item xs={12} md={8} lg={9}>
+          <TideLatLon readValue={props.readValue} writeValue={props.writeValue}/>
           </Grid>
-          <Box pt={4}>
-            <Copyright />
-          </Box>
-        </Container>
-      </main>
-    )
+      </Grid>
+      </Container>
+  </main>);
 }
 
 export default TideApiDashboard;
