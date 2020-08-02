@@ -60,7 +60,7 @@ const WifiScanner = props => {
         console.log('Failure callback');
     }
 
-    return (<Paper className={fixedHeightPaper}>
+    return (<Paper >
     <Button variant='contained' id='scanButton' onClick={handleOnClick}>Scan</Button>
     {wifis.map(wifi => <Wifi key={wifi} hasPassword={wifi.indexOf(":") != -1} writeValueNoRead={props.writeValueNoRead} wifiName={wifi}/>)}
   </Paper>)

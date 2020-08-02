@@ -57,7 +57,7 @@ const LDRActive = props => {
         setStatus(newAlignment);
       };
 
-    return (<Paper className={fixedHeightPaper}>
+    return (<Paper>
     <ToggleButtonGroup
         value={status}
         exclusive
