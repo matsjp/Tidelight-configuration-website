@@ -87,7 +87,7 @@ const Brightness = props => {
         event.preventDefault();
     }
 
-    return (<Paper className={fixedHeightPaper}>
+    return (<Paper >
     {progressDisplay ? <CircularProgress/> : <p>{brightnessText}</p>}
     <form onSubmit={formSubmit}>
         <TextField id='brightnessInput' label='New brightness' variant='filled' 
