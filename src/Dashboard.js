@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
@@ -18,20 +18,34 @@ import WifiDashboard from './components/WifiDashboard';
 import OfflineDashboard from './components/OfflineDashboard'
 import useStyles from './Style'
 import { configServiceUUID, offlineServiceUUID, wifiServiceUUID} from './UUIDs'
+import {DeviceNotFoundError, NotConnectedError} from './errors'
 
 export default function Dashboard() {
     const classes = useStyles();
-    const [open, setOpen] = React.useState(true);
-    const handleDrawerOpen = () => {
-        setOpen(true);
-    };
-    const handleDrawerClose = () => {
-        setOpen(false);
-    };
+    const [open, setOpen] = React.useState(false);
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
     const [dashboard, setDashboard] = React.useState('TideApiDashboard');
     const [isConnected, setIsConnected] = React.useState(false);
     const [bluetoothDevice, setBluetoothDevice] = React.useState(null);
+    const [error, setError] = useState(null);
+
+
+    useEffect(() => {
+      try{
+        if(!navigator.bluetooth.getAvailability()){
+          setError("Nettleseren finner ingen bluetooth adapter. For å bruke denne nettsiden trenger du en fungerende bluetooth adapter");
+        }
+      }
+      catch(e){
+        if (e.name === "TypeError"){
+          setError("Din nettleser støtter ikke web bluetooth. Bruk nyeste versjon av Google Chrome på Windows, Android eller Mac");
+        }
+        else{
+          console.log(e);
+          setError("En ukjent feil har oppstått");
+        }
+      };
+    },[])
 
     const readValue = (serviceUUID, characteristicUUID, successCallback, failureCallback) => {
         if (!bluetoothDevice){
@@ -54,6 +68,19 @@ export default function Dashboard() {
           console.log('Read failure not connected')
           failureCallback();
         }
+      }
+
+      const readValue1 = async (serviceUUID, characteristicUUID) => {
+        if (!bluetoothDevice){
+          throw new DeviceNotFoundError("No bluetooth device");
+        }
+        if (!isConnected){
+          throw new NotConnectedError("Not connected");
+        }
+        const service = await bluetoothDevice.gatt.getPrimaryService(serviceUUID);
+        const characteristic = await service.getCharacteristic(characteristicUUID);
+        const value = await characteristic.readValue();
+        return value;
       }
     
     const writeValue = (serviceUUID, characteristicUUID, successCallback, failureCallback, value) => {
@@ -80,6 +107,18 @@ export default function Dashboard() {
           console.log('Write failure not connected')
           failureCallback();
         }
+      }
+
+      const writeValue1 = async (serviceUUID, characteristicUUID, value) => {
+        if (!bluetoothDevice){
+          throw new DeviceNotFoundError("No bluetooth device");
+        }
+        if (!isConnected){
+          throw new NotConnectedError("Not connected");
+        }
+        const service = await bluetoothDevice.gatt.getPrimaryService(serviceUUID);
+        const characteristic = await service.getCharacteristic(characteristicUUID);
+        await characteristic.writeValue(value);
       }
 
       const writeValueNoRead = (serviceUUID, characteristicUUID, successCallback, failureCallback, value) => {
@@ -131,10 +170,10 @@ export default function Dashboard() {
 
     let selectedDashboard;
     if (dashboard === 'TideApiDashboard'){
-        selectedDashboard = <TideApiDashboard readValue={readValue} writeValue={writeValue}/>;
+        selectedDashboard = <TideApiDashboard readValue={readValue} writeValue={writeValue} readValue1={readValue1} writeValue1={writeValue1} bluetoothDevice={bluetoothDevice}/>;
     }
     else if (dashboard === 'LEDDashboard'){
-        selectedDashboard = <LEDDashboard readValue={readValue} writeValue={writeValue} writeValueNoRead={writeValueNoRead}/>
+        selectedDashboard = <LEDDashboard readValue={readValue} writeValue={writeValue} writeValueNoRead={writeValueNoRead} readValue1={readValue1} writeValue1={writeValue1} bluetoothDevice={bluetoothDevice}/>
     }
     else if (dashboard === 'LDRDashboard'){
         selectedDashboard = <LDRDashboard readValue={readValue} writeValue={writeValue}/>
@@ -157,24 +196,26 @@ export default function Dashboard() {
         }
     }
 
-    const connect = () => {
+    const connect = async () => {
         let options = {};
           options.acceptAllDevices = true;
           options.optionalServices = [configServiceUUID, offlineServiceUUID, wifiServiceUUID];
-        navigator.bluetooth.requestDevice(options)
-        .then(device => {
+
+          try{
+            const device = await navigator.bluetooth.requestDevice(options);
             console.log(device);
-          setBluetoothDevice(device);
-          console.log(device);
-          console.log('> Name:             ' + device.name);
-          console.log('> Id:               ' + device.id);
-          console.log('> Connected:        ' + device.gatt.connected);
-          device.addEventListener('gattserverdisconnected', onDeviceDisconnected);
-          return device.gatt.connect()
-            .then(()=>{
-              setIsConnected(true);
-            });
-        })
+            setBluetoothDevice(device);
+            console.log(device);
+            console.log('> Name:             ' + device.name);
+            console.log('> Id:               ' + device.id);
+            console.log('> Connected:        ' + device.gatt.connected);
+            device.addEventListener('gattserverdisconnected', onDeviceDisconnected);
+            await device.gatt.connect();
+            setIsConnected(true);
+          }
+          catch(e){
+            console.log(e);
+          }
       }
 
     const disconnect = () => {
@@ -194,42 +235,50 @@ export default function Dashboard() {
         setIsConnected(false);
     }
 
+    let sidebar;
+    let dashboardContent;
+    if (isConnected){
+      sidebar = <Drawer
+      variant="permanent"
+      classes={{
+        paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+      }}
+      open={false}
+    >
+      <div className={classes.toolbarIcon}>
+          <IconButton>
+            <ChevronLeftIcon />
+          </IconButton>
+        </div>
+      <Divider />
+      <List><MainListItems setDashboard={setDashboard}/></List>
+      <Divider />
+    </Drawer>;
+    dashboardContent = selectedDashboard;
+    }
+    else {
+      sidebar = "";
+      dashboardContent = "";
+    }
+
+
+
+    if (error != null){
+      return <p>{error}</p>
+    }
+
     return (
     <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
         <Toolbar className={classes.toolbar} onClick={handleOnClick} id='toolbar'>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-          >
-            <MenuIcon />
-          </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
           {isConnected ? 'Disconnect' : 'Connect'}
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <Divider />
-        <List><MainListItems setDashboard={setDashboard}/></List>
-        <Divider />
-      </Drawer>
-      {selectedDashboard}
+      {sidebar}
+      {dashboardContent};
     </div>
     );
 }

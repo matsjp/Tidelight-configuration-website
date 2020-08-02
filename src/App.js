@@ -7,6 +7,7 @@ import {brightnessSuccess} from './ReadWriteCallbacks'
 import Dashboard from './Dashboard'
 
 const App = () => {
+
   return (
     <div className="App">
       <Dashboard />

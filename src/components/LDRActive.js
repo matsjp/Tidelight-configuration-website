@@ -7,11 +7,14 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
 import {configServiceUUID, ldrActiveCharacteristicUUID} from './../UUIDs';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 
 const LDRActive = props => {
     const classes = useStyles();
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
     const [readLdrActive, setReadLdrActive] = useState(null);
+    const [status, setStatus] = useState(null);
 
 
 
@@ -50,7 +53,24 @@ const LDRActive = props => {
         event.preventDefault();
     }
 
+    const handleAlignment = (event, newAlignment) => {
+        setStatus(newAlignment);
+      };
+
     return (<Paper className={fixedHeightPaper}>
+    <ToggleButtonGroup
+        value={status}
+        exclusive
+        onChange={handleAlignment}
+        aria-label="text alignment"
+        >
+        <ToggleButton value="on" aria-label="left aligned">
+                On
+        </ToggleButton>
+        <ToggleButton value="off" aria-label="centered">
+                Off
+        </ToggleButton>
+    </ToggleButtonGroup>
     <p>{readLdrActive}</p>
     <Button variant='contained' id='ldrActiveRead' onClick={handleOnClick}>Read ldr active</Button>
     <form onSubmit={formSubmit}>
