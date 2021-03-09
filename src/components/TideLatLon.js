@@ -131,17 +131,22 @@ const TideLatLon = props => {
                 const valueString = latValue + ":" + lonValue;
                 const value = str2ab(valueString);
                 await props.writeValue(configServiceUUID, latLonCharacteristicUUID, value);
+                await props.subscribe(configServiceUUID, latLonCharacteristicUUID, notificationReceived);
                 setReadLatLon(valueString);
                 setReadLat(latValue);
                 setReadLon(lonValue);
             }
             catch(e){
                 console.log(e);
-            }
-            finally{
                 setProgressDisplay(false);
             }
         }
+    }
+
+    const notificationReceived = async event => {
+        console.log('Notification received');
+        setProgressDisplay(false);
+        await props.unsubscribe(configServiceUUID, latLonCharacteristicUUID, notificationReceived);
     }
 
     const formSubmit = (event) => {

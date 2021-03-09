@@ -3,12 +3,14 @@ import clsx from 'clsx';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import useStyles from './../Style';
-import TideLatLon from './TideLatLon';
+import OfflineData from './OfflineData';
+import InternetConnection from './InternetConnection';
 
 
-const TideApiDashboard = props => {
+const DebugDashboard = props => {
   const classes = useStyles();
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  console.log(props);
 
   return (
   <main className={classes.content}>
@@ -16,11 +18,12 @@ const TideApiDashboard = props => {
       <Container maxWidth="lg" className={classes.container}>
       <Grid container direction="column" justify="center" alignItems="center" spacing={3}>
           <Grid item xs={12} md={8} lg={9}>
-          <TideLatLon readValue={props.readValue1} writeValue={props.writeValue1} subscribe={props.subscribe} unsubscribe={props.unsubscribe} bluetoothDevice={props.bluetoothDevice}/>
+          <OfflineData readValue={props.readValue} bluetoothDevice={props.bluetoothDevice}/>
+          <InternetConnection readValue={props.readValue} bluetoothDevice={props.bluetoothDevice}/>
           </Grid>
       </Grid>
       </Container>
   </main>);
 }
 
-export default TideApiDashboard;
+export default DebugDashboard;

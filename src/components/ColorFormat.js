@@ -6,12 +6,12 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
-import {configServiceUUID, ldrActiveCharacteristicUUID} from './../UUIDs';
+import {configServiceUUID, colorFormatCharacteristicUUID} from './../UUIDs';
 
-const LDRActive = props => {
+const ColorFormat = props => {
     const classes = useStyles();
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-    const [readLdrActive, setReadLdrActive] = useState(null);
+    const [format, setFormat] = useState(null);
 
 
 
@@ -20,23 +20,23 @@ const LDRActive = props => {
             if (props.bluetoothDevice!=null){
                 try{
                     const service = await props.bluetoothDevice.gatt.getPrimaryService(configServiceUUID);
-                    const characteristic = await service.getCharacteristic(ldrActiveCharacteristicUUID);
+                    const characteristic = await service.getCharacteristic(colorFormatCharacteristicUUID);
                     if (characteristic.value != null){
                         const value = characteristic.value;
                         if (value.getUint8(0) === 1){
-                            setReadLdrActive('On');
+                            setFormat('RGB');
                         }
                         else {
-                            setReadLdrActive('Off');
+                            setFormat('BGR');
                         }
                     }
                     else {
-                        const value = await props.readValue(configServiceUUID, ldrActiveCharacteristicUUID);
+                        const value = await props.readValue(configServiceUUID, colorFormatCharacteristicUUID);
                         if (value.getUint8(0) === 1){
-                            setReadLdrActive('On');
+                            setFormat('RGB');
                         }
                         else {
-                            setReadLdrActive('Off');
+                            setFormat('BGR');
                         }
                     }
                 }
@@ -55,26 +55,26 @@ const LDRActive = props => {
 
         const eventTarget = event.currentTarget.id;
 
-        if (eventTarget === 'ldrActiveOn'){
+        if (eventTarget === 'rgb'){
             const value = Uint8Array.of(1);
-            await props.writeValue(configServiceUUID, ldrActiveCharacteristicUUID, value);
-            const value2 = await props.readValue(configServiceUUID, ldrActiveCharacteristicUUID);
+            await props.writeValue(configServiceUUID, colorFormatCharacteristicUUID, value);
+            const value2 = await props.readValue(configServiceUUID, colorFormatCharacteristicUUID);
             if (value2.getUint8(0) === 1){
-                setReadLdrActive('On');
+                setFormat('RGB');
             }
             else {
-                setReadLdrActive('Off');
+                setFormat('BGR');
             }
         }
-        else if (eventTarget === 'ldrActiveOff'){
+        else if (eventTarget === 'bgr'){
             const value = Uint8Array.of(2);
-            await props.writeValue(configServiceUUID, ldrActiveCharacteristicUUID, value);
-            const value2 = await props.readValue(configServiceUUID, ldrActiveCharacteristicUUID);
+            await props.writeValue(configServiceUUID, colorFormatCharacteristicUUID, value);
+            const value2 = await props.readValue(configServiceUUID, colorFormatCharacteristicUUID);
             if (value2.getUint8(0) === 1){
-                setReadLdrActive('On');
+                setFormat('RGB');
             }
             else {
-                setReadLdrActive('Off');
+                setFormat('BGR');
             }
         }
     }
@@ -83,13 +83,15 @@ const LDRActive = props => {
         event.preventDefault();
     }
 
+
     return (<Paper>
-    <p>{readLdrActive}</p>
+    <p>{format}</p>
     <form onSubmit={formSubmit}>
-        <Button variant='contained' id='ldrActiveOn' onClick={handleOnClick}>On</Button>
-        <Button variant='contained' id='ldrActiveOff' onClick={handleOnClick}>Off</Button>
+        <Button variant='contained' id='rgb' onClick={handleOnClick}>RGB</Button>
+        <Button variant='contained' id='bgr' onClick={handleOnClick}>BGR</Button>
     </form>
+    <p>After changing the color format, restart the tide light to apply it</p>
   </Paper>)
 }
 
-export default LDRActive;
+export default ColorFormat;
