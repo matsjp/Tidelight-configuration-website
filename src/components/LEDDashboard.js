@@ -16,6 +16,8 @@ import {configServiceUUID, highTideDirectionColorCharacteristicUUID,
     noTideLevelIndicatorColorCharacteristicUUID,
     tideLevelIndicatorMovingColorCharacteristicUUID,
     noTideLevelIndicatorMovingColorCharacteristicUUID} from './../UUIDs'
+import LEDCount from './LEDCount';
+import ColorFormat from './ColorFormat';
 
 const LEDDashboard = props => {
     const classes = useStyles();
@@ -68,6 +70,12 @@ const LEDDashboard = props => {
               <Paper className={classes.paper}>
                 <Reset  readValue={props.readValue} writeValue={props.writeValue} writeValueNoRead={props.writeValueNoRead}/>
               </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <LEDCount readValue={props.readValue1} writeValue={props.writeValue1} bluetoothDevice={props.bluetoothDevice}/>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <ColorFormat readValue={props.readValue1} writeValue={props.writeValue1} bluetoothDevice={props.bluetoothDevice}/>
             </Grid>
         </Grid>
         </Container>

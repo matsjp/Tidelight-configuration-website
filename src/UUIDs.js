@@ -18,11 +18,15 @@ export const movingPatternCharacteristicUUID = 0xec19;
 export const movingSpeedCharacteristicUUID = 0xec1a;
 export const latLonCharacteristicUUID = 0xec1b;
 export const resetUUID = 0xec1c;
+export const LEDCountUUID = 0xec1d;
 
 //wifiService
 export const wifiScanCharacteristicUUID = 0xec0f;
 export const addWifiCharacteristicUUID = 0xec10;
+export const internetConnectionCharacteristicUUID = 0xec11
 
 //offlineService
+export const hardwareClockSyncCharacteristic = 0xec11;
+export const OfflineDataCharacteristicUUID = 0xec10
 export const offlineModeCharacteristicUUID = 0xec0f;
 export const offlineDownloadCharacteristicUUID = 0xec10;
