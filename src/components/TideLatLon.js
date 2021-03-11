@@ -17,7 +17,7 @@ const TideLatLon = props => {
     const [readLon, setReadLon] = useState(null);
     const [progressDisplay, setProgressDisplay] = useState(false);
     const [newLatLon, setNewLatLon] = useState(null);
-    const [disableButton, setDisableButton] = useState(true);
+    const [disableButton, setDisableButton] = useState(false);
     const [buttonProgressDisplay, setButtonProgressDisplay] = useState(false);
 
     const latLonText = 'LatLon: ' + readLatLon;
@@ -25,6 +25,7 @@ const TideLatLon = props => {
 
     useEffect(() => {
         const apiCall = async () => {
+            return
             try{
                 setButtonProgressDisplay(true);
                 const split = newLatLon.split(":");
