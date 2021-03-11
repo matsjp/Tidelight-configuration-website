@@ -17,8 +17,10 @@ import LDRDashboard from './components/LDRDashboard';
 import WifiDashboard from './components/WifiDashboard';
 import OfflineDashboard from './components/OfflineDashboard'
 import useStyles from './Style'
-import { configServiceUUID, offlineServiceUUID, wifiServiceUUID} from './UUIDs'
+import { configServiceUUID, offlineServiceUUID, wifiServiceUUID, hardwareClockSyncCharacteristic} from './UUIDs'
 import {DeviceNotFoundError, NotConnectedError} from './errors'
+import { str2ab} from './utils'
+import DebugDashboard from './components/DebugDashboard';
 
 export default function Dashboard() {
     const classes = useStyles();
@@ -168,15 +170,40 @@ export default function Dashboard() {
         }
       }
 
+      const subscribe1 = async (serviceUUID, characteristicUUID, changeCallback) => {
+        if (!bluetoothDevice){
+          throw new DeviceNotFoundError("No bluetooth device");
+        }
+        if (!isConnected){
+          throw new NotConnectedError("Not connected");
+        }
+        const service = await bluetoothDevice.gatt.getPrimaryService(serviceUUID);
+        const characteristic = await service.getCharacteristic(characteristicUUID);
+        await characteristic.startNotifications();
+        await characteristic.addEventListener('characteristicvaluechanged', changeCallback);
+      }
+
+      const unsubscribe = async (serviceUUID, characteristicUUID, changeCallback) => {
+        if (!bluetoothDevice){
+          throw new DeviceNotFoundError("No bluetooth device");
+        }
+        if (!isConnected){
+          throw new NotConnectedError("Not connected");
+        }const service = await bluetoothDevice.gatt.getPrimaryService(serviceUUID);
+        const characteristic = await service.getCharacteristic(characteristicUUID);
+        await characteristic.stopNotifications();
+        await characteristic.removeEventListener('characteristicvaluechanged', changeCallback);
+      }
+
     let selectedDashboard;
     if (dashboard === 'TideApiDashboard'){
-        selectedDashboard = <TideApiDashboard readValue={readValue} writeValue={writeValue} readValue1={readValue1} writeValue1={writeValue1} bluetoothDevice={bluetoothDevice}/>;
+        selectedDashboard = <TideApiDashboard readValue={readValue} writeValue={writeValue} readValue1={readValue1} writeValue1={writeValue1} subscribe={subscribe1} unsubscribe={unsubscribe} bluetoothDevice={bluetoothDevice}/>;
     }
     else if (dashboard === 'LEDDashboard'){
         selectedDashboard = <LEDDashboard readValue={readValue} writeValue={writeValue} writeValueNoRead={writeValueNoRead} readValue1={readValue1} writeValue1={writeValue1} bluetoothDevice={bluetoothDevice}/>
     }
     else if (dashboard === 'LDRDashboard'){
-        selectedDashboard = <LDRDashboard readValue={readValue} writeValue={writeValue}/>
+        selectedDashboard = <DebugDashboard readValue={readValue1} bluetoothDevice={bluetoothDevice}/>
     }
     else if (dashboard === 'WifiDashboard'){
         selectedDashboard = <WifiDashboard readValue={readValue} writeValue={writeValue} subscribe={subscribe} writeValueNoRead={writeValueNoRead}/>
@@ -211,7 +238,14 @@ export default function Dashboard() {
             console.log('> Connected:        ' + device.gatt.connected);
             device.addEventListener('gattserverdisconnected', onDeviceDisconnected);
             await device.gatt.connect();
+            console.log(device)
             setIsConnected(true);
+
+            const now = Math.floor(new Date().getTime()/1000).toString();
+            const value = str2ab("@" + now);
+            const service = await device.gatt.getPrimaryService(offlineServiceUUID);
+            const characteristic = await service.getCharacteristic(hardwareClockSyncCharacteristic);
+            await characteristic.writeValue(value);
           }
           catch(e){
             console.log(e);
